@@ -1,0 +1,125 @@
+# Notify on power status change
+- id: "power-status-up"
+  alias: Power Status Up
+  description: ""
+  trigger:
+    - platform: state
+      entity_id:
+        # This is one of the Sunsynk Sensors
+        - binary_sensor.ss_grid_connected
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+      from:
+      to: "on"
+  condition: []
+  action:
+    # if you install the HA app on your phone there will be a notification action for it
+    - service: notify.mobile_app_my_phone
+      data:
+        message: "The electricity is back on"
+        title: "Power status"
+  mode: single
+
+- id: "power_status_down"
+  alias: Power Status Down
+  description: ""
+  trigger:
+    - platform: state
+      entity_id:
+        # This is one of the Sunsynk Sensors
+        - binary_sensor.ss_grid_connected
+      from: "on"
+      to: "off"
+      for:
+        hours: 0
+        minutes: 0
+        seconds: 0
+  condition: []
+  action:
+    # if you install the HA app on your phone there will be a notification action for it
+    - service: notify.mobile_app_my_phone
+      data:
+        title: "Power status"
+        message: "The electricity is off"
+  mode: single
+
+# Force a grid charge if there is not enough in the batterries for the next load shedding time
+# Requires EskomSePush HACS plugin
+- id: "grid_charge_on"
+  alias: Automated battery charging - On
+  description: ""
+  trigger:
+    - platform: calendar
+      event: start
+      offset: "-2:0:0" # Check 2 hours in advence
+      entity_id: calendar.loadshedding_local_events
+  condition:
+    - type: is_battery_level
+      condition: device
+      device_id: some_device_id # Change this
+      entity_id: sensor.ss_battery_soc
+      domain: sensor
+      below: 50
+    - type: is_power
+      condition: device
+      device_id: some_device_id # Change this
+      entity_id: sensor.power_production_next_hour
+      domain: sensor
+      below: 600
+  action:
+    # Set the inverter to charge, mine will stop charging at 60%, that is a setting on the inverter.
+    - device_id: some_device_id # Change this
+      domain: select
+      entity_id: select.ss_prog1_charge
+      type: select_option
+      option: Allow Grid
+    - device_id: some_device_id # Change this
+      domain: number
+      entity_id: number.ss_prog1_capacity
+      type: set_value
+      value: 60
+    - device_id: some_device_id # Change this
+      domain: select
+      entity_id: select.ss_prog1_mode
+      type: select_option
+      option: Charge
+    # Notify when starting the grid charge.
+    - service: notify.mobile_app_phone
+      data:
+        message: Starting to charge battery for 2 hours
+        title: Inverter message
+  mode: single
+
+- id: "grid_charge_off"
+  alias: Automated battery charging - Off
+  description: ""
+  trigger:
+    - platform: calendar
+      event: start
+      offset: -0:5:0
+      entity_id: calendar.loadshedding_local_events
+  condition:
+    - condition: device
+      device_id: some_device_id # Change this
+      domain: select
+      entity_id: select.ss_prog1_mode
+      type: selected_option
+      option: Charge
+  action:
+    - device_id: some_device_id # Change this
+      domain: select
+      entity_id: select.ss_prog1_mode
+      type: select_option
+      option: None
+    - device_id: some_device_id # Change this
+      domain: number
+      entity_id: number.ss_prog1_capacity
+      type: set_value
+      value: 40
+    - service: notify.mobile_app_phone
+      data:
+        message: Terminating grid battery charge
+        title: Inverter message
+  mode: single

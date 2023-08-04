@@ -1,0 +1,11 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Include files
+automation: !include automations.yaml
+binary_sensor: !include binary_sensor.yaml
+sensor: !include sensor.yaml
+
+# Frontend
+frontend:
+  themes: !include_dir_merge_named themes

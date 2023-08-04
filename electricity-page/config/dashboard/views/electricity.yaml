@@ -1,0 +1,420 @@
+title: "Electricity"
+path: "electricity"
+
+# This is my entire electricity view. Though there are some issues, it mostly works.
+# The only issues are with load shedding and I will fix that
+# Also note that this laypout works in a phone as well as a tablet or PC
+
+cards:
+  - type: vertical-stack
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: "custom:button-card"
+            template: chip_back
+            variables:
+              ulm_chip_back_path: home
+
+          - type: "custom:button-card"
+            template: custom_card_title
+            name: "Energy"
+
+          - type: "custom:button-card"
+            color_type: blank-card
+
+          - type: "custom:button-card"
+            template: custom_chip_mdi_text_icon_state
+            variables:
+              ulm_chip_mdi_icon_state_entity: sensor.loadshedding_national_status
+              ulm_chip_mdi_icon_state_icon: mdi:transmission-tower
+              ulm_chip_mdi_icon_state_text: Stage
+
+      # ----------------------------------------------------------------------------
+      # Load shedding and power issues
+      # ----------------------------------------------------------------------------
+      - type: conditional
+        conditions:
+          - entity: sensor.loadshedding_local_status_currently_loadshedding
+            state_not: "True"
+        card:
+          type: horizontal-stack
+          cards:
+            - type: tile
+              name: Next power outage is from
+              entity: sensor.next_loadshedding_scheduled_time
+              icon: mdi:transmission-tower-off
+              color: red
+
+      - type: conditional
+        conditions:
+          - entity: sensor.loadshedding_local_status_currently_loadshedding
+            state: "True"
+          - entity: binary_sensor.house_power
+            state: "unavailable"
+        card:
+          type: horizontal-stack
+          cards:
+            - type: tile
+              name: "Currently load shedding until"
+              entity: sensor.current_loadshedding_end_time
+              icon: mdi:power-plug-off
+              color: red
+
+      - type: conditional
+        conditions:
+          - entity: sensor.loadshedding_local_status_currently_loadshedding
+            state: "False"
+          - entity: binary_sensor.house_power
+            state: "unavailable"
+        card:
+          type: horizontal-stack
+          cards:
+            - type: tile
+              name: "Power Failure in progress"
+              entity: sensor.power_usage
+              icon: mdi:power-plug-off
+              color: red
+
+      # ----------------------------------------------------------------------------
+      # Electricity consumption
+      # ----------------------------------------------------------------------------
+
+      - type: custom:power-flow-card
+        title: Overview
+        kw_decimals: 2
+        entities:
+          battery: sensor.ss_battery_power
+          battery_charge: sensor.ss_battery_soc
+          grid:
+            consumption: sensor.ss_grid_power
+          solar: sensor.ss_pv1_power
+          #inverted_entities: grid
+
+      - type: "custom:button-card"
+        template: card_generic
+        entity: sensor.agregated_power_usage
+        variables:
+          ulm_card_generic_name: Monitored appliances current draw
+          ulm_card_generic_icon: mdi:gauge-low
+
+      # ----------------------------------------------------------------------------
+      # Manual Grid Charge
+      # ----------------------------------------------------------------------------
+      - type: horizontal-stack
+        cards:
+          - type: "custom:button-card"
+            template: card_light
+            entity: automation.automated_battery_charging
+            variables:
+              ulm_card_light_force_background_color: true
+              ulm_card_light_name: "Start Grid Charge"
+              ulm_card_light_icon: mdi:power-plug-battery
+              ulm_card_light_color: red
+
+          - type: "custom:button-card"
+            color_type: blank-card
+
+  - type: vertical-stack
+    cards:
+      # ----------------------------------------------------------------------------
+      # Kitchen
+      # ----------------------------------------------------------------------------
+      - type: "custom:button-card"
+        template: card_title
+        label: "Kitchen"
+
+      - type: horizontal-stack
+        cards:
+          #Fridge
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_fridge_power
+            variables:
+              ulm_card_graph_icon: mdi:fridge-variant
+              ulm_card_graph_color: "var(--google-blue)"
+              ulm_card_graph_name: Fridge
+              ulm_card_graph_entity: sensor.shelly_fridge_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          #Dishwasher
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_dishwasher_power
+            variables:
+              ulm_card_graph_icon: mdi:dishwasher
+              ulm_card_graph_color: "var(--google-red)"
+              ulm_card_graph_name: Dishwasher
+              ulm_card_graph_entity: sensor.shelly_dishwasher_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+      - type: horizontal-stack
+        cards:
+          #Kettle
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_kitchen_kettle_plug_power
+            variables:
+              ulm_card_graph_icon: mdi:kettle-outline
+              ulm_card_graph_color: "var(--google-green)"
+              ulm_card_graph_name: Kettle Plug
+              ulm_card_graph_entity: sensor.shelly_kitchen_kettle_plug_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          #Microwave Oven
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.microwave_power
+            variables:
+              ulm_card_graph_icon: mdi:microwave
+              ulm_card_graph_color: "#FFFFFF"
+              ulm_card_graph_name: Microwave Oven
+              ulm_card_graph_entity: sensor.microwave_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+      - type: horizontal-stack
+        cards:
+          #Toaster
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_kitchen_multi_plug_power
+            variables:
+              ulm_card_graph_icon: mdi:toaster
+              ulm_card_graph_color: "var(--google-green)"
+              ulm_card_graph_name: Toaster
+              ulm_card_graph_entity: sensor.shelly_kitchen_multi_plug_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          - type: "custom:button-card"
+            color_type: blank-card
+
+      # ----------------------------------------------------------------------------
+      # Office
+      # ----------------------------------------------------------------------------
+
+      - type: "custom:button-card"
+        template: card_title
+        label: "Office"
+
+      - type: horizontal-stack
+        cards:
+          #Pascal's Desk Plug
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.pascals_desk_power
+            variables:
+              ulm_card_graph_icon: mdi:desk
+              ulm_card_graph_color: "var(--google-blue)"
+              ulm_card_graph_name: Pascal's Desk Plug
+              ulm_card_graph_entity: sensor.pascals_desk_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          - type: "custom:button-card"
+            color_type: blank-card
+
+      # ----------------------------------------------------------------------------
+      # TV Room
+      # ----------------------------------------------------------------------------
+      - type: "custom:button-card"
+        template: card_title
+        label: "TV Room"
+
+      - type: horizontal-stack
+        cards:
+          #Toaster
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_upstair_s_tv_plug_power
+            variables:
+              ulm_card_graph_icon: mdi:television
+              ulm_card_graph_color: "var(--google-green)"
+              ulm_card_graph_name: TV (24h)
+              ulm_card_graph_entity: sensor.shelly_upstair_s_tv_plug_energy
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          - type: "custom:button-card"
+            color_type: blank-card
+
+      # ----------------------------------------------------------------------------
+      # Garage
+      # ----------------------------------------------------------------------------
+      - type: "custom:button-card"
+        template: card_title
+        label: "Garage"
+
+      - type: horizontal-stack
+        cards:
+          #Whashing Machine
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.shelly_washing_machine_energy
+            variables:
+              ulm_card_graph_icon: mdi:washing-machine
+              ulm_card_graph_color: "var(--google-blue)"
+              ulm_card_graph_name: Washing Machine
+              ulm_card_graph_entity: sensor.shelly_washing_machine_energy
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          #3D Printer
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.3d_printer_power
+            variables:
+              ulm_card_graph_icon: mdi:printer-3d
+              ulm_card_graph_color: "var(--google-red)"
+              ulm_card_graph_name: 3D Printer
+              ulm_card_graph_entity: sensor.3d_printer_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+      # ----------------------------------------------------------------------------
+      # House
+      # ----------------------------------------------------------------------------
+
+      - type: "custom:button-card"
+        template: card_title
+        label: "House"
+
+      - type: horizontal-stack
+        cards:
+          #Solar Geyser
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.solar_geyser_switch_power
+            variables:
+              ulm_card_graph_icon: mdi:storage-tank-outline
+              ulm_card_graph_color: "var(--google-blue)"
+              ulm_card_graph_name: Solar Geyser
+              ulm_card_graph_entity: sensor.solar_geyser_switch_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+          #Inverter Grid Usage
+          - type: "custom:button-card"
+            template: card_graph
+            entity: sensor.ss_grid_power
+            variables:
+              ulm_card_graph_icon: mdi:transmission-tower
+              ulm_card_graph_color: "var(--google-red)"
+              ulm_card_graph_name: Inverter Grid Usage
+              ulm_card_graph_entity: sensor.ss_grid_power
+              ulm_card_graph_type: fill
+              ulm_card_graph_hours: 24
+              ulm_card_graph_group_by: interval
+
+  - type: vertical-stack
+    cards:
+      - type: "custom:button-card"
+        template: card_title
+        name: "Last 24 Hours"
+
+      - type: "custom:button-card"
+        template: custom_card_damix48_power_details
+        entity: sensor.ss_pv1_power
+        variables:
+          ulm_card_power_details_name: Solar Pannels
+          ulm_card_power_details_entity: sensor.ss_pv1_power
+          ulm_card_power_details_hours: 24
+          ulm_card_power_details_24hour: true
+          ulm_card_power_details_thresholds:
+            - value: 0
+              color: "#DB4437"
+            - value: 1000
+              color: "#FFA600"
+            - value: 2000
+              color: "#43A047"
+
+      - type: "custom:button-card"
+        template: custom_card_damix48_power_details
+        entity: sensor.ss_essential_power
+        variables:
+          ulm_card_power_details_name: Inverter Output
+          ulm_card_power_details_entity: sensor.ss_essential_power
+          ulm_card_power_details_hours: 24
+          ulm_card_power_details_24hour: true
+          ulm_card_power_details_thresholds:
+            - value: 0
+              color: "#43A047"
+            - value: 1000
+              color: "#FFA600"
+            - value: 2000
+              color: "#DB4437"
+
+      - type: "custom:button-card"
+        template: custom_card_damix48_power_details
+        entity: sensor.ss_battery_power
+        variables:
+          ulm_card_power_details_name: Battery Power
+          ulm_card_power_details_entity: sensor.ss_battery_power
+          ulm_card_power_details_hours: 24
+          ulm_card_power_details_24hour: true
+          ulm_card_power_details_thresholds:
+            - value: -100
+              color: "#43A047"
+            - value: 0
+              color: "#80A1d4"
+            - value: 100
+              color: "#FFA600"
+            - value: 1000
+              color: "#DB4437"
+
+      - type: "custom:button-card"
+        template: custom_card_damix48_power_details
+        entity: sensor.ss_grid_power
+        variables:
+          ulm_card_power_details_name: Inverter Grid Power Usage
+          ulm_card_power_details_entity: sensor.ss_grid_power
+          ulm_card_power_details_hours: 24
+          ulm_card_power_details_24hour: true
+          ulm_card_power_details_thresholds:
+            - value: 550
+              color: "#43A047"
+            - value: 100
+              color: "#FFA600"
+            - value: 500
+              color: "#DB4437"
+
+  - type: vertical-stack
+    cards:
+      - type: "custom:button-card"
+        template: custom_card_damix48_power_details
+        entity: sensor.custom_power_usage
+        variables:
+          ulm_card_power_details_name: Total Grid Power Usage
+          ulm_card_power_details_entity: sensor.custom_power_usage
+          ulm_card_power_details_hours: 24
+          ulm_card_power_details_24hour: true
+          ulm_card_power_details_thresholds:
+            - value: 0
+              color: "#43A047"
+            - value: 1000
+              color: "#FFA600"
+            - value: 2000
+              color: "#DB4437"
+
+      - type: "custom:button-card"
+        template: card_title
+        name: "Monthly"
+
+      - type: entities
+        entities:
+          - entity: sensor.monthly_consumption
+          - entity: sensor.monthly_energy_cost
+          - entity: sensor.co2_signal_co2_intensity

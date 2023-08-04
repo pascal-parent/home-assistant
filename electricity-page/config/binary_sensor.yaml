@@ -1,0 +1,19 @@
+---
+#---------------------------------------------------------
+# Power Sensor
+#---------------------------------------------------------
+# Tells the system if the grid is up or down
+# This comes fromt the clamp on the grid in to you house
+# If you do not have that you can use the inverter sensor, in my case binary_sensor.ss_grid_connected
+- platform: template
+  sensors:
+    house_power:
+      friendly_name: House Power
+      device_class: power
+      value_template: >
+        {% set house_power = states('sensor.power_usage') | float %}
+        {% if house_power > 0 %}
+          {{'on'}}
+        {% else %}
+          {{'off'}}
+        {% endif %}

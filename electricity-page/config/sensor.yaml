@@ -1,0 +1,130 @@
+---
+# World clock
+- platform: worldclock
+  time_zone: Africa/Johannesburg
+
+# Time and Date
+- platform: time_date
+  display_options:
+    - "date_time_iso"
+
+# These are useful to do some automations
+- platform: template
+  sensors:
+    date:
+      friendly_name: "Date"
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A, %-d %B %Y') }}"
+    time:
+      friendly_name: "Time"
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%H:%M') }}"
+    sunrise:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunrise"
+    sunset:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunset"
+    noon:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunset"
+
+    # Total known device power usage usefull if like me you have Shelly 1PM Sensors around the house
+    agregated_power_usage:
+      friendly_name: "Total Used Power by known devices"
+      unit_of_measurement: W
+      device_class: power
+      value_template: "
+        {{ [ states('sensor.microwave_power'),
+        states('sensor.pascals_desk_power'),
+        states('sensor.shelly_dishwasher_power'),
+        states('sensor.shelly_fridge_power'),
+        states('sensor.shelly_kitchen_multi_plug_power'),
+        states('sensor.shelly_upstair_s_tv_plug_energy'),
+        states('sensor.solar_geyser_switch_power'),
+        states('sensor.solar_geyser_switch_power'),
+        states('sensor.shelly_kitchen_kettle_plug_power') ]
+        | map('float') | sum }}
+        "
+
+    # Total Kitchen power usage, this is a room lavel agregation example
+    agregated_kitchen_power_usage:
+      friendly_name: "Total Kitchen Power"
+      unit_of_measurement: W
+      device_class: power
+      value_template: "
+        {{ [ states('sensor.microwave_power'),
+        states('sensor.shelly_dishwasher_power'),
+        states('sensor.shelly_fridge_power'),
+        states('sensor.shelly_kitchen_multi_plug_power'),
+        states('sensor.shelly_kitchen_kettle_plug_power') ]
+        | map('float') | sum }}
+        "
+
+#----------------------------------------------------------
+# Loadshedding
+#----------------------------------------------------------
+# If you installed the EskomSePush sensor, this is useful, it also gets used by the automations
+- platform: attributes
+  friendly_name: "Currently Loadshedding"
+  attribute: "Currently Loadshedding"
+  icon: "mdi:power-plug-off"
+  entities:
+    - sensor.loadshedding_local_status
+
+- platform: template
+  sensors:
+    current_loadshedding_start_time:
+      friendly_name: Current Loadshedding Start Time
+      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%H:%M') }}"
+      icon_template: "mdi:clock-remove"
+
+    current_loadshedding_end_time:
+      friendly_name: Current Loadshedding End Time
+      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%H:%M') }}"
+      icon_template: "mdi:clock-remove"
+
+    next_loadshedding_scheduled_time:
+      friendly_name: Current Loadshedding schedule is set from
+      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%H:%M') }} to {{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%H:%M') }}"
+      icon_template: "mdi:clock-remove"
+
+    next_loadshedding_start_time_raw:
+      friendly_name: Next Loadshedding Start Time Raw
+      value_template: "{{  as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%R') }}"
+      icon_template: "mdi:clock-remove"
+
+    next_loadshedding_end_time_raw:
+      friendly_name: Next Loadshedding End Time Raw
+      value_template: "{{  as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%R') }}"
+      icon_template: "mdi:clock-remove"
+
+#----------------------------------------------------------
+# Sensors for Tuya devices
+#----------------------------------------------------------
+# If, like me, you use some Tuya products with Local Tuya, this is a good example
+- platform: template
+  sensors:
+    solar_geyser_switch_power:
+      unique_id: "solar_geyser_switch_power"
+      friendly_name: "Solar Geyser Switch"
+      unit_of_measurement: "W"
+      value_template: "{{ state_attr('switch.solar_geyser_switch','current_consumption') }}"
+
+    solar_geyser_switch_current:
+      unique_id: "solar_geyser_switch_current"
+      friendly_name: "3D Printer Plug Current"
+      unit_of_measurement: "A"
+      value_template: "{{ state_attr('switch.solar_geyser_switch','current') }}"
+
+    solar_geyser_switch_voltage:
+      unique_id: "solar_geyser_switch_voltage"
+      friendly_name: "3D Printer Plug Voltage"
+      unit_of_measurement: "V"
+      value_template: "{{ state_attr('switch.solar_geyser_switch','voltage') }}"
+
+- platform: integration
+  source: sensor.solar_geyser_switch_power
+  name: Solar Geyser Energy
+  unit_prefix: k
+  method: trapezoidal
+  unit_time: h
+  round: 2

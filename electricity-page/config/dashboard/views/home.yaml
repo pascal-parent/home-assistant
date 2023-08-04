@@ -1,0 +1,80 @@
+title: "Home"
+path: "home"
+cards:
+  # ----------------------------------------------------------------------------
+  # Load shedding and power issues
+  # ----------------------------------------------------------------------------
+  - type: conditional
+    conditions:
+      - entity: sensor.loadshedding_local_status_currently_loadshedding
+        state_not: "True"
+    card:
+      type: horizontal-stack
+      cards:
+        - type: tile
+          name: Next load shedding is scheduled for
+          entity: sensor.next_loadshedding_scheduled_time
+          icon: mdi:transmission-tower-off
+          color: red
+
+  - type: conditional
+    conditions:
+      - entity: sensor.loadshedding_local_status_currently_loadshedding
+        state: "True"
+      - entity: binary_sensor.house_power
+        state: "unavailable"
+    card:
+      type: horizontal-stack
+      cards:
+        - type: tile
+          name: "Currently load shedding until"
+          entity: sensor.current_loadshedding_end_time
+          icon: mdi:power-plug-off
+          color: red
+
+  - type: conditional
+    conditions:
+      - entity: sensor.loadshedding_local_status_currently_loadshedding
+        state: "False"
+      - entity: binary_sensor.house_power
+        state: "unavailable"
+    card:
+      type: horizontal-stack
+      cards:
+        - type: tile
+          name: "Power Failure in progress"
+          entity: sensor.power_usage
+          icon: mdi:power-plug-off
+          color: red
+
+  # ----------------------------------------------------------------------------
+  # Electricity Glance items
+  # ----------------------------------------------------------------------------
+  - type: horizontal-stack
+    cards:
+      - type: "custom:button-card"
+        template: custom_chip_power_consumption
+        variables:
+          ulm_chip_electric_consumption: sensor.ss_pv1_power
+          ulm_chip_electric_navigate_icon: mdi:solar-power
+          ulm_chip_electric_navigate_path: electricity
+
+      - type: "custom:button-card"
+        color_type: blank-card
+
+      - type: "custom:button-card"
+        template: custom_chip_power_consumption
+        variables:
+          ulm_chip_electric_consumption: sensor.ss_essential_power
+          ulm_chip_electric_navigate_icon: mdi:home-lightning-bolt
+          ulm_chip_electric_navigate_path: electricity
+
+      - type: "custom:button-card"
+        color_type: blank-card
+
+      - type: "custom:button-card"
+        template: custom_chip_power_consumption
+        variables:
+          ulm_chip_electric_consumption: sensor.custom_power_usage
+          ulm_chip_electric_navigate_icon: mdi:transmission-tower-import
+          ulm_chip_electric_navigate_path: electricity
