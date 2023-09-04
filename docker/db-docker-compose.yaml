@@ -7,7 +7,7 @@ services:
       - /[YOUR-PATH]/InfluxDB/data:/var/lib/influxdb2:rw
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=root
+      - DOCKER_INFLUXDB_INIT_USERNAME=[your-admin-user]
       - DOCKER_INFLUXDB_INIT_PASSWORD=[your-strong-password]
       - DOCKER_INFLUXDB_INIT_ORG=v[your-org]
       - DOCKER_INFLUXDB_INIT_BUCKET=default
@@ -23,7 +23,7 @@ services:
     depends_on:
       - influxdb
     environment:
-      - GF_SECURITY_ADMIN_USER=[your-admin-user]]
+      - GF_SECURITY_ADMIN_USER=[your-admin-user]
       - GF_SECURITY_ADMIN_PASSWORD=[your-strong-password]
       - GF_INSTALL_PLUGINS=
     links:
