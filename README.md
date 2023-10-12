@@ -11,5 +11,3 @@ This is a collection of Home Assistant YAML scripts I use, each page has its own
 ## Dashboard
 - [Electricity Page](dashboard/electricity-page/)
 
-## Docker
-[Docker scripts](docker)

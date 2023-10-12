@@ -1,87 +1,128 @@
 title: "Home"
 path: "home"
 cards:
-  - type: vertical-stack
-    in_card: true
+- type: vertical-stack
     cards:
       # ----------------------------------------------------------------------------
-      # Load shedding and power issues
+      # Electricity
       # ----------------------------------------------------------------------------
-      - type: conditional
-        conditions:
-          - entity: sensor.loadshedding_local_status_currently_loadshedding
-            state_not: "True"
-        card:
-          type: horizontal-stack
-          cards:
-            - type: tile
-              name: Next load shedding is scheduled for
-              entity: sensor.next_loadshedding_scheduled_time
-              icon: mdi:transmission-tower
-              color: white
+      - type: vertical-stack
+        in_card: true
+        cards:
+          - type: "custom:button-card"
+            template: custom_card_title
+            name: Electricity
+            card_mod:
+              style: |
+                ha-card {
+                  margin-top: 15px;
+                }
 
-      - type: conditional
-        conditions:
-          - entity: sensor.loadshedding_local_status_currently_loadshedding
-            state: "True"
-          - entity: sensor.power_usage
-            state: "0"
-        card:
-          type: horizontal-stack
-          cards:
-            - type: tile
-              name: "Currently load shedding until"
-              entity: sensor.current_loadshedding_end_time
-              icon: mdi:transmission-tower-off
-              color: red
+          # ----------------------------------------------------------------------------
+          # Energy
+          # ----------------------------------------------------------------------------
+          - type: glance
+            show_name: false
+            entities:
+              - entity: sensor.sunsynk_pv1_power
+                name: Solar
+                icon: mdi:solar-power
+                tap_action:
+                  action: navigate
+                  navigation_path: "electricity"
+              - entity: sensor.sunsynk_battery_soc
+                name: Charge
+                tap_action:
+                  action: navigate
+                  navigation_path: "electricity"
+              - entity: sensor.sunsynk_battery_power
+                name: Batteries
+                icon: mdi:home-battery-outline
+                tap_action:
+                  action: navigate
+                  navigation_path: "electricity"
+              - entity: sensor.sunsynk_essential_power
+                name: Essential
+                icon: mdi:home-lightning-bolt
+                tap_action:
+                  action: navigate
+                  navigation_path: "electricity"
+              - entity: sensor.efergy_power_usage
+                name: Grid
+                icon: mdi:transmission-tower
+                tap_action:
+                  action: navigate
+                  navigation_path: "electricity"
 
-      - type: conditional
-        conditions:
-          - entity: sensor.loadshedding_local_status_currently_loadshedding
-            state: "False"
-          - entity: sensor.power_usage
-            state: "unavailable"
-        card:
-          type: horizontal-stack
-          cards:
-            - type: tile
-              name: "Power Failure in progress"
-              entity: sensor.power_usage
-              icon: mdi:transmission-tower-off
-              color: red
+          # ----------------------------------------------------------------------------
+          # Charging status
+          # ----------------------------------------------------------------------------
+          - type: markdown
+            content: |
+              {% set gp = states('sensor.sunsynk_grid_power') | float(0) %}
+              {% set bp = states('sensor.sunsynk_battery_power') | float(0) %}
+              {% if is_state('input_boolean.sunsynk_house_batteries_charging', 'on') %}
+                {% if (gp > 50) %}
+                  <ha-alert alert-type="error">Batteries Charging from Grid</ha-alert>
+                {% else %}
+                  <ha-alert alert-type="success">Batteries Charging from Solar Panels</ha-alert>
+                {% endif %}
+              {% else %}
+                {% if (bp > 100) %}
+                  <ha-alert alert-type="warning">On batteries</ha-alert>
+                {% else %}
+                  <ha-alert alert-type="error">On grid</ha-alert>
+                {% endif %}
+              {% endif %}
+            card_mod:
+              style: |
+                ha-card {
+                  margin-top: 10px;
+                  margin-bottom: -10px;
+                  background: #372A2900;
+                }
 
-      # ----------------------------------------------------------------------------
-      # Energy
-      # ----------------------------------------------------------------------------
-      - type: glance
-        show_name: false
-        entities:
-          - entity: sensor.ss_pv1_power
-            name: Solar
-            icon: mdi:solar-power
-            tap_action:
-              action: navigate
-              navigation_path: "electricity"
-          - entity: sensor.ss_battery_soc
-            name: Charge
-            tap_action:
-              action: navigate
-              navigation_path: "electricity"
-          - entity: sensor.ss_battery_power
-            name: Batteries
-            icon: mdi:home-battery-outline
-            tap_action:
-              action: navigate
-              navigation_path: "electricity"
-          - entity: sensor.ss_essential_power
-            name: Essential
-            icon: mdi:home-lightning-bolt
-            tap_action:
-              action: navigate
-              navigation_path: "electricity"
-          - entity: sensor.power_usage
-            name: Grid
-            icon: mdi:transmission-tower
-            tap_action:
-              action: navigate
-              navigation_path: "electricity"
+          # ----------------------------------------------------------------------------
+          # Load shedding and power issues
+          # ----------------------------------------------------------------------------
+          - type: custom:atomic-calendar-revive
+            enableModeChange: true
+            firstDayOfWeek: 1
+            refreshInterval: 1800
+            entities:
+              - entity: calendar.loadshedding_local_events
+                maxDaysToShow: 1
+            showCurrentEventLine: false
+            showMonth: false
+            showWeekDay: true
+            disableEventLink: true
+            showNoEventsForToday: false
+            disableLocationLink: true
+            showFullDayProgress: false
+            showEventIcon: false
+            showHiddenText: false
+            showCalendarName: false
+            calShowDescription: false
+            showLastCalendarWeek: true
+            disableCalEventLink: true
+            disableCalLocationLink: true
+            disableCalLink: true
+            showDescription: false
+            dateFormat: LL
+            showDate: false
+            sortByStartTime: false
+            showRelativeTime: true
+            showProgressBar: true
+            showLocation: true
+            showDeclined: false
+            showMultiDayEventParts: false
+            showMultiDay: false
+            showLoader: false
+            maxEventCount: 1
+            untilText: "Until"
+            compactMode: false
+            card_mod:
+              style: |
+                ha-card {
+                  margin-top: 10px;
+                }

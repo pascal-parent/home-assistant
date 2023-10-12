@@ -1,75 +1,7 @@
 ---
-# World clock
-- platform: worldclock
-  time_zone: Africa/Johannesburg
-
-# Time and Date
-- platform: time_date
-  display_options:
-    - "date_time_iso"
-
-# These are useful to do some automations
-- platform: template
-  sensors:
-    date:
-      friendly_name: "Date"
-      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A, %-d %B %Y') }}"
-    time:
-      friendly_name: "Time"
-      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%H:%M') }}"
-    sunrise:
-      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
-      friendly_name: "Sunrise"
-    sunset:
-      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
-      friendly_name: "Sunset"
-    noon:
-      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
-      friendly_name: "Sunset"
-
-    # Total known device power usage usefull if like me you have Shelly 1PM Sensors around the house
-    agregated_power_usage:
-      friendly_name: "Total Used Power by known devices"
-      unit_of_measurement: W
-      device_class: power
-      value_template: "
-        {{ [ states('sensor.microwave_power'),
-        states('sensor.pascals_desk_power'),
-        states('sensor.shelly_dishwasher_power'),
-        states('sensor.shelly_fridge_power'),
-        states('sensor.shelly_kitchen_multi_plug_power'),
-        states('sensor.shelly_upstair_s_tv_plug_energy'),
-        states('sensor.solar_geyser_switch_power'),
-        states('sensor.solar_geyser_switch_power'),
-        states('sensor.shelly_kitchen_kettle_plug_power') ]
-        | map('float') | sum }}
-        "
-
-    # Total Kitchen power usage, this is a room lavel agregation example
-    agregated_kitchen_power_usage:
-      friendly_name: "Total Kitchen Power"
-      unit_of_measurement: W
-      device_class: power
-      value_template: "
-        {{ [ states('sensor.microwave_power'),
-        states('sensor.shelly_dishwasher_power'),
-        states('sensor.shelly_fridge_power'),
-        states('sensor.shelly_kitchen_multi_plug_power'),
-        states('sensor.shelly_kitchen_kettle_plug_power') ]
-        | map('float') | sum }}
-        "
-
 #----------------------------------------------------------
 # Loadshedding
 #----------------------------------------------------------
-# If you installed the EskomSePush sensor, this is useful, it also gets used by the automations
-- platform: attributes
-  friendly_name: "Currently Loadshedding"
-  attribute: "Currently Loadshedding"
-  icon: "mdi:power-plug-off"
-  entities:
-    - sensor.loadshedding_local_status
-
 - platform: template
   sensors:
     current_loadshedding_start_time:
@@ -100,12 +32,41 @@
 #----------------------------------------------------------
 # Sensors for Tuya devices
 #----------------------------------------------------------
-# If, like me, you use some Tuya products with Local Tuya, this is a good example
+# Tuya 3D Printer Plug
+- platform: template
+  sensors:
+    tuya_3d_printer_plug_power:
+      unique_id: "tuya_3d_printer_plug_power"
+      friendly_name: "Tuya 3D Printer Plug Power"
+      unit_of_measurement: "W"
+      value_template: "{{ state_attr('switch.tuya_3d_printer_plug','current_consumption') }}"
+
+    tuya_3d_printer_plug_current:
+      unique_id: "tuya_3d_printer_plug_current"
+      friendly_name: "Tuya 3D Printer Plug Current"
+      unit_of_measurement: "A"
+      value_template: "{{ state_attr('switch.tuya_3d_printer_plug','current') }}"
+
+    tuya_3d_printer_plug_voltage:
+      unique_id: "tuya_3d_printer_plug_voltage"
+      friendly_name: "Tuya 3D Printer Plug Voltage"
+      unit_of_measurement: "V"
+      value_template: "{{ state_attr('switch.tuya_3d_printer_plug','voltage') }}"
+
+- platform: integration
+  source: sensor.tuya_3d_printer_plug_power
+  name: 3D Printer Energy
+  unit_prefix: k
+  method: trapezoidal
+  unit_time: h
+  round: 2
+
+# Solar Geyser Switch
 - platform: template
   sensors:
     solar_geyser_switch_power:
       unique_id: "solar_geyser_switch_power"
-      friendly_name: "Solar Geyser Switch"
+      friendly_name: "Solar Geyser Switch Power"
       unit_of_measurement: "W"
       value_template: "{{ state_attr('switch.solar_geyser_switch','current_consumption') }}"
 
@@ -128,3 +89,37 @@
   method: trapezoidal
   unit_time: h
   round: 2
+
+#----------------------------------------------------------
+# Additional electricity sensors
+#----------------------------------------------------------
+# PV1 Max power
+- platform: daily_min_max
+  name: Solar Panels Daily Maximum Output
+  type: max
+  entity_ids:
+    - sensor.sunsynk_pv1_power
+
+# Sunsynk Load Power Daily Maximum
+- platform: daily_min_max
+  name: Sunsynk Load Power Daily Maximum
+  type: max
+  entity_ids:
+    - sensor.sunsynk_load_power
+
+# Grid usage (sensor.efergy_power_usage - sensor.sunsynk_grid_power)
+- platform: template
+  sensors:
+    grid_non_essential_power:
+      friendly_name: "Grid Non Essential Power"
+      unit_of_measurement: W
+      device_class: power
+      unique_id: "grid_non_essential_power"
+      value_template: "{{ states('sensor.efergy_power_usage') | float - states('sensor.sunsynk_grid_power') | float }}"
+
+    grid_current:
+      friendly_name: "Grid Current"
+      unit_of_measurement: A
+      device_class: current
+      unique_id: "grid_current"
+      value_template: "{{ states('sensor.grid_non_essential_power') | float / states('sensor.sunsynk_grid_voltage') | float }}"

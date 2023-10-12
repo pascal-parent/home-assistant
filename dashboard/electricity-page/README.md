@@ -1,6 +1,9 @@
 # Home Assistant Electricity Dashboard Page
 
-![Image of the house electricity dashboard page](Images/Electricity_Dashboard.png)
+![Image of my electricity dashboard page](Images/Electricity-Dashboard-v1.5.png)
+
+### Home dashboard Electricity Panel
+![Image of my home dashboard electricity section](Images/Home-Dashboard-Electricity-panel-v1.9.png)
 
 **Important note:** This page does not replace the Energy dashboard, it compliments it.
 
@@ -18,7 +21,7 @@ We wanted to be able to monitor house's electricity metrics in real time, to lea
 So after we fitted our inverter, a Sunsynk 8kw Hybrid, we started to strategically install [Shelly 1PM sensors](https://shellysa.co.za/products/relays/shelly-plus-1pm/) around the house, these are under the rooms section of the dashboard (second column).  
 It has been of great help, it even showed us some issues in our house which we will attend to over time.
   
-*Note: I can't find Shelly 1PM sensors anymore, it's replacement is the Shelly Plus 1PM, the diferance as I can gather is the chip, the Plus 1PM uses an ESP32 whereas the 1PM used an ESP8266, it also has a higher price tag.*
+*Note: I can't find Shelly 1PM sensors anymore, it's replacement is the Shelly Plus 1PM, the difference as far as I can gather is the chip, the Plus 1PM uses an ESP32 whereas the 1PM used an ESP8266, it also has a higher price tag.*
 
 ## Assumptions
 
@@ -31,6 +34,7 @@ It has been of great help, it even showed us some issues in our house which we w
 * A running instance of Home Assistant
 * An integration into your inverter  
   I use [kellerza's addon for Sunsynk/Dyer](https://github.com/kellerza/sunsynk) on a Raspberry Pi Zero 2 W mounted to a [Raspberry Pi Zero 2W To 3B Adapter](https://www.pishop.co.za/store/raspberry-pi-zero-2w-to-3b-adapter-alternative-solution-for-raspberry-pi-3-model-bb) but a Raspberry Pi 3 or 4 should do just fine.
+  (I am working on an ESP32 based alternative)
 * Optional: An HA integrated power monitor on your grid, separate to the inverter one, I use an Efergy, I may move to a DIY solution or a Shelly EM.  
 
 ## Minimum Dependencies
@@ -43,6 +47,7 @@ Though you could use any other themes, I like the control of code, so the minima
 * [Power Flow Card](https://github.com/ulic75/power-flow-card)
 * [Canary](https://github.com/jcwillox/lovelace-canary)
 * [Horseshoe Card](https://github.com/AmoebeLabs/flex-horseshoe-card#-show-section)
+* [Atomic Calendar Revive](https://github.com/totaldebug/atomic-calendar-revive)
 * Optional for my South African friends, [Eskom Loadshedding Interface](https://github.com/swartjean/ha-eskom-loadshedding), tutorial [here](https://www.youtube.com/watch?v=krFWcetvUOc)
 
 ## Installation
@@ -68,7 +73,8 @@ Though I have attempted to make this as easy and painless as possible, I may hav
 ## History
 
 - 2023-08-04 First commit.
-- 2023-08-30 Updated dashboard to include horseshoe meters, merged some cards and cleaned up some cards
+- 2023-08-30 Updated dashboard to include horseshoe meters, merged some cards and cleaned up some cards.
+- 2023-10-12 Updated the Load Shedding panel, added a battery state panel and changed the manual charge buttons which now work with scripts.
 
 ## Sponsoring
 
