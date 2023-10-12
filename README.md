@@ -10,5 +10,5 @@ This is a collection of Home Assistant YAML scripts I use, each page has its own
 
 ## Dashboard
 - [Electricity Page](dashboard/electricity-page/)
-- [Electricity Page](dashboard/weather-page/)
+- [Weather Page](dashboard/weather-page/)
 
