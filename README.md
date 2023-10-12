@@ -1,4 +1,4 @@
-# Home Assistant Dashboards and Docker Compose Scripts
+# Home Assistant Dashboards
 
 ## Warning!
 
