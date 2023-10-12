@@ -1,0 +1,85 @@
+title: "Home"
+path: "home"
+cards:
+  - type: vertical-stack
+    cards:
+
+      # Weather Forcast
+      - type: vertical-stack
+        in_card: true
+        cards:
+          # Forecast
+          - type: custom:weather-card
+            entity: weather.tomorrow_io_home_nowcast
+            number_of_forecasts: "1"
+            current: true
+            details: false
+            forecast: false
+            hourly_forecast: false
+
+          # 12 hour Forcast
+          - type: custom:hourly-weather
+            entity: weather.tomorrow_io_home_hourly
+            name: null
+            icons: true
+            show_precipitation_probability: true
+
+          # 6 day Forcast
+          - type: custom:clock-weather-card
+            entity: weather.tomorrow_io_home_daily
+            sun_entity: sun.sun
+            weather_icon_type: line
+            animated_icon: true
+            forecast_days: 1
+            time_format: 24
+            date_pattern: P
+            hide_today_section: true
+            hide_forecast_section: false
+
+      - type: vertical-stack
+        in_card: true
+        cards:
+          - type: "custom:button-card"
+            template: custom_card_title
+            name: "Current Weather"
+            card_mod:
+              style: |
+                ha-card {
+                  margin-top: 15px;
+                }
+
+          # ----------------------------------------------------------------------------
+          # Realtime weather
+          # ----------------------------------------------------------------------------
+          - type: glance
+            show_name: false
+            entities:
+              - entity: sensor.esphome_weather_station_dallas_temperature
+                name: Temperature
+                icon: mdi:home-thermometer-outline
+                tap_action:
+                  action: navigate
+                  navigation_path: "weather"
+              - entity: sensor.esphome_weather_station_humidity
+                name: Humidity
+                icon: mdi:water-percent
+                tap_action:
+                  action: navigate
+                  navigation_path: "weather"
+              - entity: sensor.esphome_weather_station_uv_index
+                name: UV Index
+                icon: mdi:shield-sun-outline
+                tap_action:
+                  action: navigate
+                  navigation_path: "weather"
+              - entity: sensor.esphome_weather_station_eco2_value
+                name: eCO2
+                icon: mdi:molecule-co2
+                tap_action:
+                  action: navigate
+                  navigation_path: "weather"
+              - entity: sensor.esphome_weather_station_wind_speed
+                name: Wind Speed
+                tap_action:
+                  action: navigate
+                  navigation_path: "weather"

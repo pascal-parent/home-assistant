@@ -1,0 +1,129 @@
+---
+# World clock
+- platform: worldclock
+  time_zone: Africa/Johannesburg
+
+# Time and Date
+- platform: time_date
+  display_options:
+    - "date_time_iso"
+
+- platform: template
+  sensors:
+    date:
+      friendly_name: "Date"
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%A, %-d %B %Y') }}"
+    time:
+      friendly_name: "Time"
+      value_template: "{{ as_timestamp(states('sensor.date_time_iso')) | timestamp_custom('%H:%M') }}"
+    sunrise:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_rising) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunrise"
+    sunset:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_setting) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunset"
+    noon:
+      value_template: "{% set timestamp = as_timestamp(states.sun.sun.attributes.next_noon) | timestamp_custom('%H:%M') %} {{ timestamp.lstrip('0') }}"
+      friendly_name: "Sunset"
+
+#----------------------------------------------------------
+# Sensors for Weather
+#----------------------------------------------------------
+- platform: template
+  sensors:
+    weather_current_temp:
+      value_template: "{{ state_attr('weather.tomorrow_io_home_daily', 'temperature') | round(1) }}"
+      friendly_name: "Current temperature"
+    weather_forcast_min_temp:
+      value_template: "{{ state_attr('weather.tomorrow_io_home_daily', 'forecast')[0].temperature | round(1) }}"
+      friendly_name: "Minimum temperature"
+    weather_forecast_max_temp:
+      value_template: "{{ state_attr('weather.tomorrow_io_home_daily', 'forecast')[0].templow | round(1) }}"
+      friendly_name: "Maximum temperature"
+    weather_forcast_condition:
+      value_template: "{{ states('weather.tomorrow_io_home_daily') | default('Unknown') }}"
+      friendly_name: "Forecast Condition"
+
+#----------------------------------------------------------
+# Sensors Min-Max
+#----------------------------------------------------------
+- platform: min_max
+  name: "Weather Station Average Temperature"
+  type: mean
+  round_digits: 1
+  entity_ids:
+    - sensor.esphome_weather_station_bme280_temperature
+    - sensor.esphome_weather_station_dallas_temperature
+
+- platform: min_max
+  name: "Weather Station Average Illuminance"
+  type: mean
+  round_digits: 1
+  entity_ids:
+    - sensor.esphome_weather_station_bh1750_illuminance
+    - sensor.esphome_weather_station_ltr390_illiminance
+
+# Temperature
+- platform: daily_min_max
+  name: Weather Station Daily Maximum Temperature
+  type: max
+  entity_ids:
+    - sensor.esphome_weather_station_dallas_temperature
+
+- platform: daily_min_max
+  name: Weather Station Daily Minimum Temperature
+  type: min
+  entity_ids:
+    - sensor.esphome_weather_station_dallas_temperature
+
+# Humidity
+- platform: daily_min_max
+  name: Weather Station Daily Maximum Humidity
+  type: max
+  entity_ids:
+    - sensor.esphome_weather_station_humidity
+
+- platform: daily_min_max
+  name: Weather Station Daily Minimum Humidity
+  type: min
+  entity_ids:
+    - sensor.esphome_weather_station_humidity
+
+# Wind Speed
+- platform: daily_min_max
+  name: Weather Station Daily Maximum Wind Speed
+  type: max
+  entity_ids:
+    - sensor.esphome_weather_station_wind_speed
+
+- platform: daily_min_max
+  name: Weather Station Daily Minimum Wind Speed
+  type: min
+  entity_ids:
+    - sensor.esphome_weather_station_wind_speed
+
+# eCO2
+- platform: daily_min_max
+  name: Weather Station Daily Maximum eCO2
+  type: max
+  entity_ids:
+    - sensor.esphome_weather_station_eco2_value
+
+- platform: daily_min_max
+  name: Weather Station Daily Minimum eCO2
+  type: min
+  entity_ids:
+    - sensor.esphome_weather_station_eco2_value
+
+# TVOC
+- platform: daily_min_max
+  name: Weather Station Daily Maximum TVOC
+  type: max
+  entity_ids:
+    - sensor.esphome_weather_station_total_volatile_organic_compound
+
+- platform: daily_min_max
+  name: Weather Station Daily Minimum TVOC
+  type: min
+  entity_ids:
+    - sensor.esphome_weather_station_total_volatile_organic_compound
