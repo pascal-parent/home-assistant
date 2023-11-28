@@ -17,3 +17,49 @@
         {% else %}
           {{'off'}}
         {% endif %}
+
+#---------------------------------------------------------
+# Appliences State Sensor for Automations
+#---------------------------------------------------------
+- platform: template
+  sensors:
+    # Dishwasher
+    appliance_dishwasher_state:
+      friendly_name: Dishwasher State
+      device_class: power
+      unique_id: appliance_dishwasher_state
+      icon_template: mdi:dishwasher
+      value_template: >
+        {% set dishwasher_power = states('sensor.shelly_kitchen_dishwasher_power') | float %}
+        {% if dishwasher_power > 10 %}
+          {{'on'}}
+        {% else %}
+          {{'off'}}
+        {% endif %}
+
+    # Microwave
+    appliance_microwave_state:
+      friendly_name: Microwave State
+      device_class: power
+      unique_id: appliance_microwave_state
+      icon_template: mdi:microwave
+      value_template: >
+        {% set microwave_power = states('sensor.shelly_microwave_plug_power') | float %}
+        {% if microwave_power > 10 %}
+          {{'on'}}
+        {% else %}
+          {{'off'}}
+        {% endif %}
+
+    # Washing Machine
+    appliance_washing_machine_state:
+      friendly_name: Washing Machine State
+      device_class: power
+      unique_id: appliance_washing_machine_state
+      value_template: >
+        {% set washing_machine_power = states('sensor.shelly_washing_machine_plug_power') | float %}
+        {% if washing_machine_power > 10 %}
+          {{'on'}}
+        {% else %}
+          {{'off'}}
+        {% endif %}

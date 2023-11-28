@@ -1,33 +1,43 @@
----
 #----------------------------------------------------------
 # Loadshedding
 #----------------------------------------------------------
 - platform: template
   sensors:
-    current_loadshedding_start_time:
-      friendly_name: Current Loadshedding Start Time
-      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%H:%M') }}"
-      icon_template: "mdi:clock-remove"
+    # For external display
+    next_loadshedding_time:
+      friendly_name: "Next Loadshedding Time"
+      value_template: >
+        {{ as_timestamp(state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_start_time")) | timestamp_custom('%H:%M') }}
 
-    current_loadshedding_end_time:
-      friendly_name: Current Loadshedding End Time
-      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%H:%M') }}"
-      icon_template: "mdi:clock-remove"
+    # For external display
+    next_loadshedding_duration:
+      friendly_name: "Next Loadshedding Duration"
+      value_template: >
+        {{ (state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_end_time") | as_datetime - state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_start_time") | as_datetime) }}
+  
+    # For automations
+    next_loadshedding_duration_minutes:
+      friendly_name: "Next Loadshedding Duration in minutes"
+      value_template: > 
+        {{ (state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_end_time") | as_datetime - state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_start_time") | as_datetime).total_seconds() / 60}}
 
-    next_loadshedding_scheduled_time:
-      friendly_name: Current Loadshedding schedule is set from
-      value_template: "{{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%H:%M') }} to {{ as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%H:%M') }}"
-      icon_template: "mdi:clock-remove"
+    # For external display
+    loadshedding_remainding_duration:
+      friendly_name: "Next Loadshedding Remainding Duration"
+      value_template: > 
+        {{ (state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "end_time") | as_datetime - now()) }}
 
-    next_loadshedding_start_time_raw:
-      friendly_name: Next Loadshedding Start Time Raw
-      value_template: "{{  as_timestamp(states.calendar.loadshedding_local_schedule.attributes.start_time) | timestamp_custom('%R') }}"
-      icon_template: "mdi:clock-remove"
+    # For external display
+    loadshedding_duration_until_next:
+      friendly_name: "Next Loadshedding Duration Until Next"
+      value_template: > 
+        {{ (state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_end_time") | as_datetime - now()) }}
 
-    next_loadshedding_end_time_raw:
-      friendly_name: Next Loadshedding End Time Raw
-      value_template: "{{  as_timestamp(states.calendar.loadshedding_local_schedule.attributes.end_time) | timestamp_custom('%R') }}"
-      icon_template: "mdi:clock-remove"
+    # For future use
+    loadshedding_next_stage:
+      friendly_name: "Next Loadshedding Stage"
+      value_template: > 
+        {{ (state_attr('sensor.load_shedding_area_jhbcitypower3_13_winchesterhills', "next_stage") | int) }}
 
 #----------------------------------------------------------
 # Sensors for Tuya devices

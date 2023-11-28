@@ -1,9 +1,9 @@
 # Home Assistant Electricity Dashboard Page
 
-![Image of my electricity dashboard page](Images/Electricity-Dashboard-v1.5.png)
+![Image of my electricity dashboard page](Images/Electricity-Dashboard-v1.8.png)
 
 ### Home dashboard Electricity Panel
-![Image of my home dashboard electricity section](Images/Home-Dashboard-Electricity-panel-v1.9.png)
+![Image of my home dashboard electricity section](Images/Home-Dashboard-Electricity-panel-v1.12.png)
 
 **Important note:** This page does not replace the Energy dashboard, it compliments it.
 
@@ -42,13 +42,13 @@ It has been of great help, it even showed us some issues in our house which we w
 You will have to install the following dependencies:
 * HACS - Home Assistant Community Store  
   Here is a little help from the [Smart Home Junkie](https://youtu.be/Q8Gj0LiklRE)
-* The [minimalist theme](https://github.com/UI-Lovelace-Minimalist/UI) and all it's dependencies.  
+* The [minimalist theme](https://github.com/UI-Lovelace-Minimalist/UI) from HACS and all it's dependencies.  
 Though you could use any other themes, I like the control of code, so the minimalist theme was my best fit. And this example page is entirely dependent on it.
-* [Power Flow Card](https://github.com/ulic75/power-flow-card)
-* [Canary](https://github.com/jcwillox/lovelace-canary)
-* [Horseshoe Card](https://github.com/AmoebeLabs/flex-horseshoe-card#-show-section)
-* [Atomic Calendar Revive](https://github.com/totaldebug/atomic-calendar-revive)
-* Optional for my South African friends, [Eskom Loadshedding Interface](https://github.com/swartjean/ha-eskom-loadshedding), tutorial [here](https://www.youtube.com/watch?v=krFWcetvUOc)
+* [Power Flow Card](https://github.com/ulic75/power-flow-card) from HACS
+* [Canary](https://github.com/jcwillox/lovelace-canary) from HACS
+* [Horseshoe Card](https://github.com/AmoebeLabs/flex-horseshoe-card#-show-section) from HACS
+* [Atomic Calendar Revive](https://github.com/totaldebug/atomic-calendar-revive) from HACS
+* Optional for my South African friends, [Load shedding](https://github.com/wernerhp/ha.integration.load_shedding) from HACS
 
 ## Installation
 
@@ -75,6 +75,12 @@ Though I have attempted to make this as easy and painless as possible, I may hav
 - 2023-08-04 First commit.
 - 2023-08-30 Updated dashboard to include horseshoe meters, merged some cards and cleaned up some cards.
 - 2023-10-12 Updated the Load Shedding panel, added a battery state panel and changed the manual charge buttons which now work with scripts.
+- 2023-11-28 
+   * Added battery charge state to the Energy page
+   * Replaced swartjean ESP integration with Werner Pieterson's.
+   * Replace the loadsheding graphical interface with Werner Pieterson's sample code.
+   * Various tweaks and fixes
+
 
 ## Sponsoring
 

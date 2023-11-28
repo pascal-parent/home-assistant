@@ -1,71 +1,231 @@
-# Set the charging helper (sunsynk_house_batteries_charging)
-- id: "1697049255860"
+# ToDo: Need to convert ID to Device and Entity Names
+- id: '1695647462579'
+  alias: The Dishwasher has finished
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.shelly_dishwasher_power
+      starting_threshold: 50
+      finishing_threshold: 0
+      actions:
+      - service: notify.notify
+        data:
+          message: Dishwasher has finished
+      pre_actions: []
+      finishing_hysteresis: 1
+      starting_hysteresis: 1
+
+- id: '1695647705396'
+  alias: Microwave has finished
+  description: ''
+  use_blueprint:
+    path: sbyx/notify-or-do-something-when-an-appliance-like-a-dishwasher-or-washing-machine-finishes.yaml
+    input:
+      power_sensor: sensor.shelly_microwave_plug_power
+      pre_actions: []
+      actions:
+      - service: notify.notify
+        data:
+          message: Microwave is finished
+      finishing_hysteresis: 1
+      starting_hysteresis: 1
+      starting_threshold: 30
+
+- id: '1697049255860'
   alias: Set House Battery Charging State to On
-  description: ""
+  description: ''
   trigger:
-    - type: power
-      platform: device
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 802f42e84216531885aac10e6e72ca3c
-      domain: sensor
-      below: 0
+  - type: energy
+    platform: device
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: 5afbe99707e4deb449b8ead74e342f38
+    domain: sensor
+    below: 0
+    for:
+      hours: 0
+      minutes: 1
+      seconds: 0
   condition: []
   action:
-    - service: input_boolean.turn_on
-      data: {}
-      target:
-        entity_id: input_boolean.sunsynk_house_batteries_charging
-  mode: single
-- id: "1697049687518"
-  alias: Set House Battery Charging State to Off
-  description: ""
-  trigger:
-    - type: power
-      platform: device
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 802f42e84216531885aac10e6e72ca3c
-      domain: sensor
-      above: 0
-  condition: []
-  action:
-    - service: input_boolean.turn_off
-      data: {}
-      target:
-        entity_id: input_boolean.sunsynk_house_batteries_charging
+  - service: input_boolean.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.sunsynk_house_batteries_charging
   mode: single
 
-# Set inverter to grid charge up to 60% using the script "sunsynk_grid_charge_house_batteries_to_60"
-- id: "1697057266358"
-  alias: Grid Charge to 60% for Loadshedding
-  description: ""
+- id: '1697049687518'
+  alias: Set House Battery Charging State to Off
+  description: ''
   trigger:
-    - platform: calendar
-      event: start
-      offset: "-2:0:0"
-      entity_id: calendar.loadshedding_local_events
+  - type: energy
+    platform: device
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: d7c0fb8b1ad499141da976343f5b7b89
+    domain: sensor
+    above: 0
+  condition: []
+  action:
+  - service: input_boolean.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.sunsynk_house_batteries_charging
+  mode: single
+
+- id: '1697057266358'
+  alias: Grid Charge to 60% for Loadshedding
+  description: ''
+  trigger:
+  - platform: calendar
+    event: start
+    offset: '-2:0:0'
+    entity_id: calendar.load_shedding_forecast
   condition:
+  - condition: and
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.load_shedding_stage_eskom
+      attribute: stage
+      above: 0.1
+      below: 0
+    - condition: numeric_state
+      entity_id: sensor.next_loadshedding_duration_minutes
+      below: 151
     - type: is_battery_level
       condition: device
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 030a1e9f16e8e9567dcd5486d54783d8
+      device_id: 098983338e8a800e052e1a3a3a40b59f
+      entity_id: 455ac5af4b4957ec103e246ca1328ef2
       domain: sensor
-      below: 50
+      below: 60
   action:
-    - service: script.sunsynk_grid_charge_house_batteries_to_60
-      data: {}
+  - service: script.sunsynk_grid_charge_house_batteries_to_60
+    data: {}
   mode: single
 
-#Set inverter to stop grid charging using the script "sunsynk_grid_charge_house_batteries_off"
-- id: "1697057591249"
+- id: '1697057591249'
   alias: Grid Charge Off 15mins before Loadshedding
-  description: ""
+  description: ''
   trigger:
-    - platform: calendar
-      event: start
-      offset: -0:15:0
-      entity_id: calendar.loadshedding_local_events
+  - platform: calendar
+    event: start
+    offset: -0:15:0
+    entity_id: calendar.load_shedding_forecast
+  condition:
+  - condition: device
+    type: is_on
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: f9fcc2400d44e97f4f1be35fbbf5c5ac
+    domain: switch
+  action:
+  - service: script.sunsynk_grid_charge_house_batteries_off
+    data: {}
+  mode: single
+
+- id: '1698577999295'
+  alias: Reload Efergy Integration Every Hour or when Unavalable
+  description: ''
+  trigger:
+  - platform: time_pattern
+    minutes: '59'
+    seconds: '59'
+    enabled: false
+  - platform: state
+    entity_id:
+    - sensor.efergy_power_usage
+    to: unavailable
   condition: []
   action:
-    - service: script.sunsynk_grid_charge_house_batteries_off
-      data: {}
+  - service: homeassistant.reload_config_entry
+    data: {}
+    target:
+      device_id: 8763b657aef113ba9d1eeb0b2dc6896f
+  mode: single
+
+- id: '1700692141492'
+  alias: Notify grid is Off
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.sunsynk_grid_connected
+    to: 'off'
+  condition:
+  - condition: and
+    conditions:
+    - type: is_off
+      condition: device
+      device_id: 098983338e8a800e052e1a3a3a40b59f
+      entity_id: e6245360f5e7ad3bcd4f0eda235f18cd
+      domain: binary_sensor
+    - condition: state
+      entity_id: input_boolean.grid_state
+      state: 'on'
+  action:
+  - service: notify.notify
+    data:
+      message: Grid is off
+  - service: homeassistant.turn_off
+    data: {}
+    target:
+      entity_id: input_boolean.grid_state
+  mode: single
+
+- id: '1701009173821'
+  alias: Notify Grid is back on
+  description: ''
+  trigger:
+  - platform: state
+    entity_id:
+    - binary_sensor.sunsynk_grid_connected
+    to: 'on'
+    enabled: true
+  condition:
+  - condition: and
+    conditions:
+    - type: is_on
+      condition: device
+      device_id: 098983338e8a800e052e1a3a3a40b59f
+      entity_id: e6245360f5e7ad3bcd4f0eda235f18cd
+      domain: binary_sensor
+    - condition: state
+      entity_id: input_boolean.grid_state
+      state: 'off'
+  action:
+  - service: notify.notify
+    data:
+      message: Grid is on
+  - service: homeassistant.turn_on
+    data: {}
+    target:
+      entity_id: input_boolean.grid_state
+  mode: single
+
+- id: '1701016988970'
+  alias: Grid Charge to 80% for Loadshedding
+  description: ''
+  trigger:
+  - platform: calendar
+    event: start
+    offset: '-4:0:0'
+    entity_id: calendar.load_shedding_forecast
+  condition:
+  - condition: and
+    conditions:
+    - condition: numeric_state
+      entity_id: sensor.load_shedding_stage_eskom
+      attribute: stage
+      above: 0.1
+      below: 0
+    - condition: numeric_state
+      entity_id: sensor.next_loadshedding_duration_minutes
+      above: 150
+    - type: is_battery_level
+      condition: device
+      device_id: 098983338e8a800e052e1a3a3a40b59f
+      entity_id: 455ac5af4b4957ec103e246ca1328ef2
+      domain: sensor
+      below: 51
+  action:
+  - service: script.sunsynk_grid_charge_house_batteries_to_60
+    data: {}
   mode: single

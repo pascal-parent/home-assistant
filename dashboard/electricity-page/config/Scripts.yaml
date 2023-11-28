@@ -1,51 +1,78 @@
+# ToDo: Convert IDs to Entities
 sunsynk_grid_charge_house_batteries_to_60:
-  alias: Sunsynk Grid Charge House Batteries to 60%
+  alias: Sunsynk Grid Charge House Batteries
   sequence:
-    - type: turn_on
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 2b8ccd8135d22ea1cb496167eadcd6e3
-      domain: switch
-    - device_id: 9912561f3d350a29d8133b9e55cda893
+  - device_id: 098983338e8a800e052e1a3a3a40b59f
+    domain: select
+    entity_id: 0a78084d607e6c473352f5ac65ccf767
+    type: select_option
+    option: Allow Grid
+  - device_id: 098983338e8a800e052e1a3a3a40b59f
+    domain: select
+    entity_id: 4b5e316e02f716ba2c82083cab1f0f1c
+    type: select_last
+  - if:
+    - condition: numeric_state
+      entity_id: sensor.next_loadshedding_duration_minutes
+      below: 151
+    then:
+    - device_id: 098983338e8a800e052e1a3a3a40b59f
       domain: number
-      entity_id: 78389f13ac4303f9cc0b7783c687f198
+      entity_id: 1bb360c58fdf96192381a4bee6a67372
       type: set_value
       value: 60
     - service: notify.notify
       data:
         message: Batteries Grid Charge to 60% Started
-  mode: single
-  icon: mdi:battery-charging-60
-sunsynk_grid_charge_house_batteries_to_80:
-  alias: Sunsynk Grid Charge House Batteries to 80%
-  sequence:
-    - type: turn_on
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 2b8ccd8135d22ea1cb496167eadcd6e3
-      domain: switch
-    - device_id: 9912561f3d350a29d8133b9e55cda893
+    else:
+    - device_id: 098983338e8a800e052e1a3a3a40b59f
       domain: number
-      entity_id: 78389f13ac4303f9cc0b7783c687f198
+      entity_id: 1bb360c58fdf96192381a4bee6a67372
       type: set_value
       value: 80
     - service: notify.notify
       data:
         message: Batteries Grid Charge to 80% Started
+  - type: turn_on
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: 3b13860cb25820b79e4471358748d1a9
+    domain: switch
+    enabled: true
+  - type: turn_on
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: f9fcc2400d44e97f4f1be35fbbf5c5ac
+    domain: switch
   mode: single
-  icon: mdi:battery-charging-80
+  icon: mdi:battery-charging-60
 sunsynk_grid_charge_house_batteries_off:
   alias: Sunsynk Grid Charge House Batteries Off
   sequence:
-    - type: turn_off
-      device_id: 9912561f3d350a29d8133b9e55cda893
-      entity_id: 2b8ccd8135d22ea1cb496167eadcd6e3
-      domain: switch
-    - device_id: 9912561f3d350a29d8133b9e55cda893
-      domain: number
-      entity_id: 78389f13ac4303f9cc0b7783c687f198
-      type: set_value
-      value: 40
-    - service: notify.notify
-      data:
-        message: Batteries Grid Charge Ended
+  - device_id: 098983338e8a800e052e1a3a3a40b59f
+    domain: select
+    entity_id: 0a78084d607e6c473352f5ac65ccf767
+    type: select_option
+    option: No Grid or Gen
+  - device_id: 098983338e8a800e052e1a3a3a40b59f
+    domain: select
+    entity_id: 4b5e316e02f716ba2c82083cab1f0f1c
+    type: select_first
+  - device_id: 098983338e8a800e052e1a3a3a40b59f
+    domain: number
+    entity_id: 1bb360c58fdf96192381a4bee6a67372
+    type: set_value
+    value: 40
+  - type: turn_on
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: 3b13860cb25820b79e4471358748d1a9
+    domain: switch
+    enabled: true
+  - type: turn_off
+    device_id: 098983338e8a800e052e1a3a3a40b59f
+    entity_id: f9fcc2400d44e97f4f1be35fbbf5c5ac
+    domain: switch
+  - service: notify.notify
+    data:
+      message: Batteries Grid Charge Ended
+    enabled: true
   mode: single
   icon: mdi:battery-off-outline
